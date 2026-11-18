@@ -1,0 +1,9 @@
+@layout HzLayout
+@namespace EventTicketing.Web
+
+<h1 class="hz-display">@Message</h1>
+<p class="hz-hook"><a href="/">Back to the calendar</a></p>
+
+@code {
+    [Parameter] public string Message { get; set; } = "";
+}

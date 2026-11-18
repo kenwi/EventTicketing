@@ -1,0 +1,56 @@
+@layout HzLayout
+@namespace EventTicketing.Features.Events
+@using EventTicketing.Domain
+@using EventTicketing.Web
+
+<h1 class="hz-display">The season</h1>
+<p class="hz-lede">Tech shows, talks, conferences, LAN parties, and meetups. Hosted in Oslo.</p>
+
+<nav class="hz-filters" aria-label="Event kind">
+    <a class="hz-filter @(ActiveKind is null ? "is-active" : null)" href="/">All</a>
+    @foreach (var kind in Enum.GetValues<EventKind>())
+    {
+        <a class="hz-filter @(ActiveKind == kind ? "is-active" : null)" href="/?kind=@kind">@Format.Kind(kind)</a>
+    }
+</nav>
+
+@if (Events.Count == 0)
+{
+    <p class="hz-hook">Nothing in that part of the season.</p>
+}
+else
+{
+    @foreach (var month in Events.GroupBy(e => new DateOnly(e.StartsAt.Year, e.StartsAt.Month, 1)))
+    {
+        <h2 class="hz-month">@Format.Month(month.First().StartsAt)</h2>
+        <div class="row g-4">
+            @foreach (var ev in month)
+            {
+                <div class="col-md-6">
+                    <a class="hz-card" href="/events/@ev.Id">
+                        <span class="hz-chip">@Format.Kind(ev.Kind)</span>
+                        <span class="hz-name">@ev.Name</span>
+                        <span class="hz-hook">@ev.Hook</span>
+                        <span class="hz-meta">@Format.When(ev.StartsAt) · @ev.Venue</span>
+                        <span class="hz-card-foot">
+                            <span class="hz-price">@Format.Money(ev.PriceKr)</span>
+                            <span class="@LeftClass(ev.TicketsLeft)">@Format.Left(ev.TicketsLeft)</span>
+                        </span>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public IReadOnlyList<ListEvents.Response> Events { get; set; } = [];
+    [Parameter] public EventKind? ActiveKind { get; set; }
+
+    private static string LeftClass(int ticketsLeft) => ticketsLeft switch
+    {
+        0 => "hz-low",
+        <= 10 => "hz-low",
+        _ => "hz-meta"
+    };
+}

@@ -1,26 +1,27 @@
-GET http://localhost:5000/api/events/1
+GET http://localhost:5172/api/events
 
 ###
 
-POST http://localhost:5000/api/events/1/reservations
+GET http://localhost:5172/api/events?kind=Lan
+
+###
+
+GET http://localhost:5172/api/events/1
+
+###
+
+POST http://localhost:5172/api/events/1/tickets
 Content-Type: application/json
 
-{ "quantity": 3 }
+{ "quantity": 2 }
 
 ###
 
-POST http://localhost:5000/api/events/2/reservations
-Content-Type: application/json
-
-{ "quantity": 3 }
+GET http://localhost:5172/api/tickets/HZ-REPLACE
 
 ###
 
-POST http://localhost:5000/api/events/1/reservations
+POST http://localhost:5172/api/events/2/tickets
 Content-Type: application/json
 
 { "quantity": 0 }
-
-###
-
-GET http://localhost:5000/api/events/99

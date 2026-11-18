@@ -1,0 +1,22 @@
+@layout HzLayout
+@namespace EventTicketing.Features.Tickets
+@using EventTicketing.Web
+
+@if (Ticket is null)
+{
+    <h1 class="hz-display">@Message</h1>
+    <p class="hz-hook">Check the code and use the field in the header.</p>
+}
+else
+{
+    <p class="hz-chip">@Format.Kind(Ticket.Kind)</p>
+    <h1 class="hz-display">@Ticket.EventName</h1>
+    <p class="hz-meta">@Format.When(Ticket.StartsAt) · @Ticket.Venue</p>
+    <p class="hz-code">@Ticket.Code</p>
+    <p class="hz-meta">@Ticket.Quantity @(Ticket.Quantity == 1 ? "ticket" : "tickets") · @Format.Money(Ticket.TotalKr)</p>
+}
+
+@code {
+    [Parameter] public FindTicket.Response? Ticket { get; set; }
+    [Parameter] public string Message { get; set; } = "";
+}

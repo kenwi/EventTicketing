@@ -1,0 +1,48 @@
+@layout HzLayout
+@namespace EventTicketing.Features.Events
+@using EventTicketing.Web
+
+<p class="hz-chip">@Format.Kind(Model.Kind)</p>
+<h1 class="hz-display">@Model.Name</h1>
+<p class="hz-hook hz-lead-hook">@Model.Hook</p>
+<p class="hz-meta">@Format.When(Model.StartsAt) · @Model.Venue</p>
+<p class="hz-copy">@Model.Description</p>
+<p class="@LeftClass">@Format.Left(Model.TicketsLeft)</p>
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <p class="hz-error" role="alert">@Error</p>
+}
+
+@if (Model.TicketsLeft > 0)
+{
+    <form class="hz-buy" method="post" action="/events/@Model.Id/tickets">
+        <input type="hidden" name="@FormFieldName" value="@RequestToken" />
+        <label for="quantity">Quantity</label>
+        <input class="form-control" id="quantity" name="quantity" type="number" min="1" max="@MaxQuantity" value="1" required data-price="@Model.PriceKr" />
+        <p class="hz-total">Total <span id="total">@Format.Money(Model.PriceKr)</span></p>
+        <button class="btn btn-hz" type="submit">@(Model.PriceKr == 0 ? "Get a spot" : "Get tickets")</button>
+    </form>
+    <script>
+        const input = document.querySelector("#quantity");
+        const total = document.querySelector("#total");
+        const price = Number(input.dataset.price);
+        const format = (amount) => amount === 0
+            ? "Free"
+            : new Intl.NumberFormat("nb-NO").format(amount) + " kr";
+        input.addEventListener("input", () => {
+            const quantity = Number(input.value);
+            total.textContent = Number.isFinite(quantity) && quantity > 0 ? format(price * quantity) : "";
+        });
+    </script>
+}
+
+@code {
+    [Parameter, EditorRequired] public GetEvent.Response Model { get; set; } = default!;
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public string? FormFieldName { get; set; }
+    [Parameter] public string? RequestToken { get; set; }
+
+    private string LeftClass => Model.TicketsLeft is 0 or <= 10 ? "hz-low hz-left" : "hz-meta hz-left";
+    private int MaxQuantity => Math.Min(20, Model.TicketsLeft);
+}

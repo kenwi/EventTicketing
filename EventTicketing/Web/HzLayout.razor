@@ -1,0 +1,27 @@
+@inherits LayoutComponentBase
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hz</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/hz.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="hz-header">
+            <a class="hz-word" href="/">Hz</a>
+            <form class="hz-find" action="/tickets" method="get">
+                <label class="visually-hidden" for="ticket-code">Ticket code</label>
+                <input class="form-control" id="ticket-code" name="code" placeholder="Ticket code" autocomplete="off" />
+                <button class="btn btn-hz" type="submit">Find</button>
+            </form>
+        </header>
+        <main>
+            @Body
+        </main>
+    </div>
+</body>
+</html>

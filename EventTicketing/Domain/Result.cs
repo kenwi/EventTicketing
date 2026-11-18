@@ -3,7 +3,8 @@ namespace EventTicketing.Domain;
 public enum ErrorType
 {
     NotFound,
-    Conflict
+    Conflict,
+    Validation
 }
 
 public sealed record Error(string Code, string Description, ErrorType Type);
