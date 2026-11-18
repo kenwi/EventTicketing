@@ -13,9 +13,15 @@ builder.Services.AddScoped<ReserveTickets.Handler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddValidation();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 using(var scope = app.Services.CreateScope())
 {
