@@ -1,6 +1,7 @@
 using EventTicketing.Data;
 using EventTicketing.Domain;
 using EventTicketing.Web;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,11 +11,13 @@ public static class FindTicket
 {
     public sealed record Response(
         string Code,
+        string HolderName,
         string EventName,
         EventKind Kind,
         DateTimeOffset StartsAt,
         string Venue,
         int Quantity,
+        int RedeemedCount,
         int TotalKr);
 
     public sealed class Handler(TicketingDbContext dbContext)
@@ -30,11 +33,13 @@ public static class FindTicket
                 where reservation.Code == normalized
                 select new Response(
                     reservation.Code,
+                    reservation.HolderName,
                     ev.Name,
                     ev.Kind,
                     ev.StartsAt,
                     ev.Venue,
                     reservation.Quantity,
+                    reservation.RedeemedCount,
                     reservation.TotalKr))
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -72,6 +77,8 @@ public static class FindTicket
         app.MapGet("/tickets/{code}", async (
             string code,
             Handler handler,
+            IAntiforgery antiforgery,
+            HttpContext http,
             CancellationToken cancellationToken) =>
         {
             var result = await handler.HandleAsync(code, cancellationToken);
@@ -83,9 +90,12 @@ public static class FindTicket
                 });
             }
 
+            var tokens = antiforgery.GetAndStoreTokens(http);
             return (IResult)new RazorComponentResult<FindTicketPage>(new
             {
-                Ticket = result.Value
+                Ticket = result.Value,
+                FormFieldName = tokens.FormFieldName,
+                RequestToken = tokens.RequestToken
             });
         });
     }

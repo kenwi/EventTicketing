@@ -13,7 +13,11 @@ GET http://localhost:5172/api/events/1
 POST http://localhost:5172/api/events/1/tickets
 Content-Type: application/json
 
-{ "quantity": 2 }
+{ "name": "Ada Lovelace", "quantity": 2 }
+
+###
+
+POST http://localhost:5172/api/tickets/HZ-REPLACE/redeem
 
 ###
 

@@ -67,11 +67,16 @@ public sealed class Event
         };
     }
 
-    public Result<Reservation> Sell(int quantity, string code, DateTimeOffset purchasedAt)
+    public Result<Reservation> Sell(int quantity, string holderName, string code, DateTimeOffset purchasedAt)
     {
         if (quantity is < 1 or > 20)
         {
             return EventErrors.QuantityOutOfRange();
+        }
+
+        if (string.IsNullOrWhiteSpace(holderName) || holderName.Trim().Length > Reservation.NameMaxLength)
+        {
+            return EventErrors.NameInvalid();
         }
 
         if (quantity > TicketsLeft)
@@ -81,6 +86,6 @@ public sealed class Event
 
         TicketsSold += quantity;
         Version++;
-        return Reservation.Create(Id, code, quantity, PriceKr * quantity, purchasedAt);
+        return Reservation.Create(Id, code, holderName.Trim(), quantity, PriceKr * quantity, purchasedAt);
     }
 }

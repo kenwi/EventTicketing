@@ -11,12 +11,33 @@ else
 {
     <p class="hz-chip">@Format.Kind(Ticket.Kind)</p>
     <h1 class="hz-display">@Ticket.EventName</h1>
+    @if (!string.IsNullOrWhiteSpace(Ticket.HolderName))
+    {
+        <p class="hz-holder">@Ticket.HolderName</p>
+    }
     <p class="hz-meta">@Format.When(Ticket.StartsAt) · @Ticket.Venue</p>
     <p class="hz-code">@Ticket.Code</p>
     <p class="hz-meta">@Ticket.Quantity @(Ticket.Quantity == 1 ? "ticket" : "tickets") · @Format.Money(Ticket.TotalKr)</p>
+    <p class="@(Ticket.RedeemedCount >= Ticket.Quantity ? "hz-low" : "hz-meta")">@Ticket.RedeemedCount of @Ticket.Quantity in</p>
+
+    @if (!string.IsNullOrWhiteSpace(Error))
+    {
+        <p class="hz-error" role="alert">@Error</p>
+    }
+
+    @if (Ticket.RedeemedCount < Ticket.Quantity)
+    {
+        <form method="post" action="/tickets/@Ticket.Code/redeem">
+            <input type="hidden" name="@FormFieldName" value="@RequestToken" />
+            <button class="btn btn-hz" type="submit">Let one in</button>
+        </form>
+    }
 }
 
 @code {
     [Parameter] public FindTicket.Response? Ticket { get; set; }
     [Parameter] public string Message { get; set; } = "";
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public string? FormFieldName { get; set; }
+    [Parameter] public string? RequestToken { get; set; }
 }

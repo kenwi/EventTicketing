@@ -18,6 +18,8 @@
 {
     <form class="hz-buy" method="post" action="/events/@Model.Id/tickets">
         <input type="hidden" name="@FormFieldName" value="@RequestToken" />
+        <label for="holder-name">Name</label>
+        <input class="form-control" id="holder-name" name="holderName" value="@HolderName" maxlength="80" required autocomplete="name" />
         <label for="quantity">Quantity</label>
         <input class="form-control" id="quantity" name="quantity" type="number" min="1" max="@MaxQuantity" value="1" required data-price="@Model.PriceKr" />
         <p class="hz-total">Total <span id="total">@Format.Money(Model.PriceKr)</span></p>
@@ -40,6 +42,7 @@
 @code {
     [Parameter, EditorRequired] public GetEvent.Response Model { get; set; } = default!;
     [Parameter] public string? Error { get; set; }
+    [Parameter] public string? HolderName { get; set; }
     [Parameter] public string? FormFieldName { get; set; }
     [Parameter] public string? RequestToken { get; set; }
 

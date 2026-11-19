@@ -12,10 +12,13 @@ namespace EventTicketing.Features.Tickets;
 
 public static class BuyTickets
 {
-    public sealed record Request([property: Range(1, 20)] int Quantity);
+    public sealed record Request(
+        [property: Required, MaxLength(Reservation.NameMaxLength)] string Name,
+        [property: Range(1, 20)] int Quantity);
 
     public sealed record Response(
         string Code,
+        string HolderName,
         int EventId,
         string EventName,
         int Quantity,
@@ -26,6 +29,7 @@ public static class BuyTickets
     {
         public async Task<Result<Response>> HandleAsync(
             int eventId,
+            string holderName,
             int quantity,
             CancellationToken cancellationToken = default)
         {
@@ -49,7 +53,7 @@ public static class BuyTickets
             }
 
             var code = await NextCodeAsync(cancellationToken);
-            var sold = ev.Sell(quantity, code, DateTimeOffset.UtcNow);
+            var sold = ev.Sell(quantity, holderName, code, DateTimeOffset.UtcNow);
             if (!sold.IsSuccess)
             {
                 return sold.Error!;
@@ -70,7 +74,7 @@ public static class BuyTickets
                 return EventErrors.Conflict();
             }
 
-            return new Response(code, ev.Id, ev.Name, quantity, ev.PriceKr * quantity, ev.TicketsLeft);
+            return new Response(code, holderName.Trim(), ev.Id, ev.Name, quantity, ev.PriceKr * quantity, ev.TicketsLeft);
         }
 
         private async Task<string> NextCodeAsync(CancellationToken cancellationToken)
@@ -104,13 +108,14 @@ public static class BuyTickets
             Handler handler,
             CancellationToken cancellationToken) =>
         {
-            var result = await handler.HandleAsync(eventId, request.Quantity, cancellationToken);
+            var result = await handler.HandleAsync(eventId, request.Name, request.Quantity, cancellationToken);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblem();
         });
 
     public static void MapPage(IEndpointRouteBuilder app) =>
         app.MapPost("/events/{eventId:int}/tickets", async (
             int eventId,
+            [FromForm] string? holderName,
             [FromForm] int quantity,
             Handler handler,
             GetEvent.Handler events,
@@ -118,7 +123,7 @@ public static class BuyTickets
             HttpContext http,
             CancellationToken cancellationToken) =>
         {
-            var result = await handler.HandleAsync(eventId, quantity, cancellationToken);
+            var result = await handler.HandleAsync(eventId, holderName ?? "", quantity, cancellationToken);
             if (result.IsSuccess)
             {
                 return Results.Redirect($"/tickets/{result.Value.Code}");
@@ -138,6 +143,7 @@ public static class BuyTickets
             {
                 Model = page.Value,
                 Error = result.Error!.Description,
+                HolderName = holderName,
                 FormFieldName = tokens.FormFieldName,
                 RequestToken = tokens.RequestToken
             });

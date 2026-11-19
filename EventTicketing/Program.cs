@@ -11,6 +11,7 @@ builder.Services.AddScoped<ListEvents.Handler>();
 builder.Services.AddScoped<GetEvent.Handler>();
 builder.Services.AddScoped<BuyTickets.Handler>();
 builder.Services.AddScoped<FindTicket.Handler>();
+builder.Services.AddScoped<RedeemTicket.Handler>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddValidation();
@@ -33,6 +34,7 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<TicketingDbContext>();
     dbContext.Database.EnsureCreated();
+    dbContext.EnsureReservationColumns();
 }
 
 var events = app.MapGroup("/api/events");
@@ -40,11 +42,14 @@ ListEvents.MapEndpoint(events);
 GetEvent.MapEndpoint(events);
 BuyTickets.MapEndpoint(events);
 
-FindTicket.MapEndpoint(app.MapGroup("/api/tickets"));
+var tickets = app.MapGroup("/api/tickets");
+FindTicket.MapEndpoint(tickets);
+RedeemTicket.MapEndpoint(tickets);
 
 ListEvents.MapPage(app);
 GetEvent.MapPage(app);
 BuyTickets.MapPage(app);
 FindTicket.MapPage(app);
+RedeemTicket.MapPage(app);
 
 app.Run();
